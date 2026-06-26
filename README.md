@@ -1,9 +1,9 @@
-# TradingAgents-AShare + a-stock-data 数据增强版
+# TradingAgents-AStock：A股智能投研数据增强版
 
 本分支在 [KylinMountain/TradingAgents-AShare](https://github.com/KylinMountain/TradingAgents-AShare)（14 Agent 多智能体 A 股投研系统）的基础上，整合了 [simonlin1212/a-stock-data](https://github.com/simonlin1212/a-stock-data)（7 层架构 · 28 端点 · 13 数据源），为 Agent 团队补上了研报检索、融资融券、大宗交易、限售解禁、巨潮公告等原本缺失的数据能力。
 
 > **原仓库**：https://github.com/KylinMountain/TradingAgents-AShare
-> **本分支**：https://github.com/chentao326/TradingAgents-AShare/tree/feat/a-stock-data-integration
+> **本仓库**：https://github.com/chentao326/TradingAgents-AStock
 > **数据源**：[simonlin1212/a-stock-data](https://github.com/simonlin1212/a-stock-data)（⭐5.5k，Apache 2.0）
 
 ---
@@ -130,7 +130,7 @@ TradingAgents Agent 请求数据
 ### 方式一：从本分支构建镜像（含全部数据增强）
 
 ```bash
-git clone https://github.com/chentao326/TradingAgents-AShare.git
+git clone https://github.com/chentao326/TradingAgents-AStock.git
 cd TradingAgents-AShare
 git checkout feat/a-stock-data-integration
 
@@ -145,7 +145,7 @@ docker run -d -p 8000:8000 --name tradingagents \
 ### 方式二：源码启动
 
 ```bash
-git clone https://github.com/chentao326/TradingAgents-AShare.git
+git clone https://github.com/chentao326/TradingAgents-AStock.git
 cd TradingAgents-AShare
 git checkout feat/a-stock-data-integration
 
