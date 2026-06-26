@@ -89,9 +89,9 @@ DATACENTER_URL = "https://datacenter-web.eastmoney.com/api/data/v1/get"
 # 所有 eastmoney.com 请求一律走 em_get()：串行限流（最小间隔 + 随机抖动）+ 复用
 # Keep-Alive 会话，批量调用时自动降速，避免被封。详见「数据源优先级 & 东财防封」章节。
 EM_SESSION = requests.Session()
-EM_SESSION.headers.update({"User-Agent": UA})
+# EM_SESSION.headers.update({"User-Agent": UA})
 EM_MIN_INTERVAL = 1.0          # 两次东财请求最小间隔(秒)；批量筛选建议调大到 1.5~2
-_em_last_call = [0.0]          # 模块级上次请求时间戳
+# _em_last_call = [0.0]          # 模块级上次请求时间戳
 
 def em_get(url: str, params: dict | None = None, headers: dict | None = None,
            timeout: int = 15, **kwargs):
@@ -121,23 +121,23 @@ def eastmoney_datacenter(report_name: str, columns: str = "ALL",
         return d["result"]["data"]
     return []
 
-client = tdx_client()  # 见 Prerequisites 的 tdx_client() helper（规避 0.11.x BESTIP bug；等价 Quotes.factory(market='std')）
+# client = tdx_client()  # 见 Prerequisites 的 tdx_client() helper（规避 0.11.x BESTIP bug；等价 Quotes.factory(market='std')）
 
 # === K线数据 ===
 # market: 0=深圳, 1=上海
 # category: 4=日线, 5=周线, 6=月线, 7=1分钟, 8=5分钟, 9=15分钟, 10=30分钟, 11=60分钟
-klines = client.bars(symbol='688017', category=4, offset=10)
+# klines = client.bars(symbol='688017', category=4, offset=10)
 # 返回: open, close, high, low, vol, amount, datetime
 
 # === 实时报价 ===
-quotes = client.quotes(symbol=['688017', '300476'])
+# quotes = client.quotes(symbol=['688017', '300476'])
 # 返回 46 个字段:
 #   price(现价), open, high, low, last_close(昨收)
 #   bid1~bid5, ask1~ask5, bid_vol1~bid_vol5, ask_vol1~ask_vol5
 #   vol(成交量), amount(成交额), servertime
 
 # === 逐笔成交（非交易时间返回空）===
-trades = client.transaction(symbol='688017', date='20260502')
+# trades = client.transaction(symbol='688017', date='20260502')
 # 返回: time, price, vol, num, buyorsell(0买/1卖/2中性)
 
 def tencent_quote(codes: list[str]) -> dict[str, dict]:
@@ -196,15 +196,15 @@ def tencent_quote(codes: list[str]) -> dict[str, dict]:
     return result
 
 # 用法: 个股
-quotes = tencent_quote(["688017", "300476", "002463"])
-for code, q in quotes.items():
-    print(f"{q['name']}({code}): {q['price']}元 PE={q['pe_ttm']} PB={q['pb']} 市值={q['mcap_yi']}亿")
+# quotes = tencent_quote(["688017", "300476", "002463"])
+# for code, q in quotes.items():
+#     print(f"{q['name']}({code}): {q['price']}元 PE={q['pe_ttm']} PB={q['pb']} 市值={q['mcap_yi']}亿")
 
 # 用法: 指数 — sh000001=上证指数, sh000300=沪深300, sz399006=创业板指
-index_quotes = tencent_quote(["000001", "000300", "399006"])
+# index_quotes = tencent_quote(["000001", "000300", "399006"])
 
 # 用法: ETF — sh510050=上证50ETF, sh510300=沪深300ETF
-etf_quotes = tencent_quote(["510050", "510300"])
+# etf_quotes = tencent_quote(["510050", "510300"])
 
 def baidu_kline_with_ma(code: str, start_time: str = "") -> dict:
     """百度股市通K线 — 独有能力: 返回时自带 ma5/ma10/ma20 均价"""
@@ -230,9 +230,9 @@ def baidu_kline_with_ma(code: str, start_time: str = "") -> dict:
     return {"keys": keys, "rows": rows}
 
 # 用法
-data = baidu_kline_with_ma("600519")
-print("字段:", data["keys"][:10])
-print("最近5根K线:", data["rows"][-5:])
+# data = baidu_kline_with_ma("600519")
+# print("字段:", data["keys"][:10])
+# print("最近5根K线:", data["rows"][-5:])
 # keys 包含: time, open, close, high, low, volume, amount, ma5avgprice, ma10avgprice, ma20avgprice 等
 
 REPORT_API = "https://reportapi.eastmoney.com/report/list"
@@ -283,10 +283,10 @@ def download_pdf(record: dict, target_dir: str = "./reports") -> str | None:
     return None
 
 # 用法
-reports = eastmoney_reports("688017")
-print(f"共 {len(reports)} 篇研报")
-for r in reports[:5]:
-    print(f"  {r.get('publishDate','')[:10]} | {r.get('orgSName')} | {r.get('title','')[:60]}")
+# reports = eastmoney_reports("688017")
+# print(f"共 {len(reports)} 篇研报")
+# for r in reports[:5]:
+#     print(f"  {r.get('publishDate','')[:10]} | {r.get('orgSName')} | {r.get('title','')[:60]}")
 def eastmoney_industry_reports(industry_code: str = "*", max_pages: int = 5,
                                begin: str = "2024-01-01") -> list[dict]:
     """拉取行业研报列表（qType=1）。
@@ -313,15 +313,15 @@ def eastmoney_industry_reports(industry_code: str = "*", max_pages: int = 5,
 
 # 用法
 # 1) 全行业最新研报
-reports = eastmoney_industry_reports("*", max_pages=2)
-print(f"共 {len(reports)} 篇行业研报")
-for r in reports[:5]:
-    print(f"  {r.get('publishDate','')[:10]} | {r.get('industryName')} | {r.get('orgSName')} | {r.get('title','')[:50]}")
+# reports = eastmoney_industry_reports("*", max_pages=2)
+# print(f"共 {len(reports)} 篇行业研报")
+# for r in reports[:5]:
+#     print(f"  {r.get('publishDate','')[:10]} | {r.get('industryName')} | {r.get('orgSName')} | {r.get('title','')[:50]}")
 
 # 2) 单行业（IT服务Ⅱ，行业码 1238）+ 下载首篇 PDF（复用 2.1 的 download_pdf）
-it = eastmoney_industry_reports("1238", max_pages=1)
-if it:
-    download_pdf(it[0])
+# it = eastmoney_industry_reports("1238", max_pages=1)
+# if it:
+#     download_pdf(it[0])
 
 def ths_eps_forecast(code: str) -> pd.DataFrame:
     """
@@ -347,8 +347,8 @@ def ths_eps_forecast(code: str) -> pd.DataFrame:
     return dfs[0] if dfs else pd.DataFrame()
 
 # 用法
-df = ths_eps_forecast("688017")
-print(df)
+# df = ths_eps_forecast("688017")
+# print(df)
 # "预测机构数" < 3 的要谨慎
 
 IWENCAI_BASE = os.environ.get("IWENCAI_BASE_URL", "https://openapi.iwencai.com")
@@ -432,13 +432,13 @@ def dedup_articles(articles: list[dict]) -> list[dict]:
     return sorted(best.values(), key=lambda x: x.get("publish_date", ""), reverse=True)
 
 # 用法: NL语义搜索研报
-articles = iwencai_search("人形机器人 行星滚柱丝杠 2026", channel="report", size=50)
-articles = dedup_articles(articles)
-for a in articles[:5]:
-    extra = a.get("extra") or {}
-    if isinstance(extra, str):
-        extra = json.loads(extra)
-    print(f"{a.get('publish_date','')[:10]} | {extra.get('organization','')} | {a.get('title','')[:60]}")
+# articles = iwencai_search("人形机器人 行星滚柱丝杠 2026", channel="report", size=50)
+# articles = dedup_articles(articles)
+# for a in articles[:5]:
+#     extra = a.get("extra") or {}
+#     if isinstance(extra, str):
+#         extra = json.loads(extra)
+#     print(f"{a.get('publish_date','')[:10]} | {extra.get('organization','')} | {a.get('title','')[:60]}")
 
 def ths_hot_reason(date: str = None) -> pd.DataFrame:
     """
@@ -483,9 +483,9 @@ def ths_hot_reason(date: str = None) -> pd.DataFrame:
     return df
 
 # 用法
-df = ths_hot_reason("2026-05-09")
-print(f"当日强势股: {len(df)} 只")
-print(df[["代码", "名称", "涨幅%", "题材归因"]].head(10))
+# df = ths_hot_reason("2026-05-09")
+# print(f"当日强势股: {len(df)} 只")
+# print(df[["代码", "名称", "涨幅%", "题材归因"]].head(10))
 
 HSGT_HEADERS = {
     "User-Agent": (
@@ -548,18 +548,18 @@ def _load_northbound_history(n: int = 20) -> pd.DataFrame:
     return df.tail(n)
 
 # 用法 1: 实时分钟流向
-df = hsgt_realtime()
-print(f"分钟点数: {len(df)}")
-print(df.tail(5))
+# df = hsgt_realtime()
+# print(f"分钟点数: {len(df)}")
+# print(df.tail(5))
 
 # 用法 2: 自动缓存今日收盘数据
-if not df.empty:
-    last = df.dropna().iloc[-1]
-    _save_northbound_snapshot("2026-05-17", last["hgt_yi"], last["sgt_yi"])
+# if not df.empty:
+#     last = df.dropna().iloc[-1]
+#     _save_northbound_snapshot("2026-05-17", last["hgt_yi"], last["sgt_yi"])
 
 # 用法 3: 读取历史
-hist = _load_northbound_history(20)
-print(hist)
+# hist = _load_northbound_history(20)
+# print(hist)
 def eastmoney_concept_blocks(code: str) -> dict:
     """
     个股所属板块/概念归属（东财 slist，一次请求拿全，已内置限流）。
@@ -599,9 +599,9 @@ def eastmoney_concept_blocks(code: str) -> dict:
     }
 
 # 用法
-blocks = eastmoney_concept_blocks("600519")
-print(f"共 {blocks['total']} 个板块")
-print("板块归属:", blocks["concept_tags"])
+# blocks = eastmoney_concept_blocks("600519")
+# print(f"共 {blocks['total']} 个板块")
+# print("板块归属:", blocks["concept_tags"])
 # → ['食品饮料', '白酒Ⅲ', '白酒Ⅱ', '贵州板块', '酿酒概念', 'HS300_', ...]
 
 def eastmoney_fund_flow_minute(code: str) -> list[dict]:
@@ -645,14 +645,14 @@ def eastmoney_fund_flow_minute(code: str) -> list[dict]:
     return rows
 
 # 用法: 分钟级实时资金流
-realtime = eastmoney_fund_flow_minute("000858")
-if realtime:
-    last = realtime[-1]
-    signal = "bullish" if last["main_net"] > 0 else "bearish"
-    print(f"主力净流入: {last['main_net']:.0f}元 → {signal}")
+# realtime = eastmoney_fund_flow_minute("000858")
+# if realtime:
+#     last = realtime[-1]
+#     signal = "bullish" if last["main_net"] > 0 else "bearish"
+#     print(f"主力净流入: {last['main_net']:.0f}元 → {signal}")
     # 统计全天主力净流入
-    total = sum(r["main_net"] for r in realtime)
-    print(f"全天主力累计: {total/1e4:.0f}万元")
+#     total = sum(r["main_net"] for r in realtime)
+#     print(f"全天主力累计: {total/1e4:.0f}万元")
 
 def dragon_tiger_board(code: str, trade_date: str, look_back: int = 30) -> dict:
     """
@@ -730,14 +730,14 @@ def dragon_tiger_board(code: str, trade_date: str, look_back: int = 30) -> dict:
     return {"records": records, "seats": seats, "institution": institution}
 
 # 用法
-data = dragon_tiger_board("002475", "2026-05-17")
-print(f"近30日上榜 {len(data['records'])} 次")
-for r in data["records"]:
-    print(f"  {r['date']}: {r['reason']}")
-if data["seats"]["buy"]:
-    print("买入席位 TOP5:")
-    for s in data["seats"]["buy"]:
-        print(f"  {s['name']}: 买{s['buy_amt']}万 卖{s['sell_amt']}万 净{s['net']}万")
+# data = dragon_tiger_board("002475", "2026-05-17")
+# print(f"近30日上榜 {len(data['records'])} 次")
+# for r in data["records"]:
+#     print(f"  {r['date']}: {r['reason']}")
+# if data["seats"]["buy"]:
+#     print("买入席位 TOP5:")
+#     for s in data["seats"]["buy"]:
+#         print(f"  {s['name']}: 买{s['buy_amt']}万 卖{s['sell_amt']}万 净{s['net']}万")
 
 def lockup_expiry(code: str, trade_date: str, forward_days: int = 90) -> dict:
     """
@@ -781,14 +781,14 @@ def lockup_expiry(code: str, trade_date: str, forward_days: int = 90) -> dict:
     return {"history": history, "upcoming": upcoming}
 
 # 用法
-data = lockup_expiry("002475", "2026-05-17")
-print(f"历史解禁 {len(data['history'])} 批")
-for h in data["history"][:5]:
-    print(f"  {h['date']}: {h['type']} 数量={h['shares']}")
-if data["upcoming"]:
-    print(f"未来90天待解禁 {len(data['upcoming'])} 批")
-else:
-    print("未来90天无待解禁")
+# data = lockup_expiry("002475", "2026-05-17")
+# print(f"历史解禁 {len(data['history'])} 批")
+# for h in data["history"][:5]:
+#     print(f"  {h['date']}: {h['type']} 数量={h['shares']}")
+# if data["upcoming"]:
+#     print(f"未来90天待解禁 {len(data['upcoming'])} 批")
+# else:
+#     print("未来90天无待解禁")
 
 def industry_comparison(top_n: int = 20) -> dict:
     """
@@ -829,14 +829,14 @@ def industry_comparison(top_n: int = 20) -> dict:
     }
 
 # 用法
-data = industry_comparison(20)
-print(f"共 {data['total']} 个行业")
-print("\nTOP 10 涨幅:")
-for r in data["top"][:10]:
-    print(f"  {r['rank']}. {r['name']}: {r['change_pct']}% 涨{r['up_count']}跌{r['down_count']} 领涨{r['leader']}")
-print("\nBOTTOM 5 跌幅:")
-for r in data["bottom"][-5:]:
-    print(f"  {r['rank']}. {r['name']}: {r['change_pct']}%")
+# data = industry_comparison(20)
+# print(f"共 {data['total']} 个行业")
+# print("\nTOP 10 涨幅:")
+# for r in data["top"][:10]:
+#     print(f"  {r['rank']}. {r['name']}: {r['change_pct']}% 涨{r['up_count']}跌{r['down_count']} 领涨{r['leader']}")
+# print("\nBOTTOM 5 跌幅:")
+# for r in data["bottom"][-5:]:
+#     print(f"  {r['rank']}. {r['name']}: {r['change_pct']}%")
 
 def daily_dragon_tiger(trade_date: str = None, min_net_buy: float = None) -> dict:
     """
@@ -879,39 +879,39 @@ def daily_dragon_tiger(trade_date: str = None, min_net_buy: float = None) -> dic
     return {"date": actual_date, "total_records": len(stocks), "stocks": stocks}
 
 # 用法
-data = daily_dragon_tiger("2026-05-16")
-print(f"{data['date']} 龙虎榜共 {data['total_records']} 条记录")
-for s in data["stocks"][:10]:
-    print(f"  {s['code']} {s['name']}: {s['reason']} | 净买{s['net_buy_wan']}万 涨跌{s['change_pct']}%")
+# data = daily_dragon_tiger("2026-05-16")
+# print(f"{data['date']} 龙虎榜共 {data['total_records']} 条记录")
+# for s in data["stocks"][:10]:
+#     print(f"  {s['code']} {s['name']}: {s['reason']} | 净买{s['net_buy_wan']}万 涨跌{s['change_pct']}%")
 
 # 只看净买入 > 5000 万的
-data = daily_dragon_tiger("2026-05-16", min_net_buy=5000)
-print(f"\n净买入 > 5000万: {data['total_records']} 条")
+# data = daily_dragon_tiger("2026-05-16", min_net_buy=5000)
+# print(f"\n净买入 > 5000万: {data['total_records']} 条")
 # 拉当日强势股 reason
-df_hot = ths_hot_reason()
+# df_hot = ths_hot_reason()
 
 # 词频统计 reason 列里的题材关键词
-all_tags = []
-for r in df_hot["题材归因"].dropna():
-    tags = [t.strip() for t in str(r).split("+") if t.strip()]
-    all_tags.extend(tags)
+# all_tags = []
+# for r in df_hot["题材归因"].dropna():
+#     tags = [t.strip() for t in str(r).split("+") if t.strip()]
+#     all_tags.extend(tags)
 
-cnt = Counter(all_tags)
-print("当日 TOP 10 题材热度:")
-for tag, n in cnt.most_common(10):
-    print(f"  {tag}: {n} 只")
+# cnt = Counter(all_tags)
+# print("当日 TOP 10 题材热度:")
+# for tag, n in cnt.most_common(10):
+#     print(f"  {tag}: {n} 只")
 
 # 同时拉北向当日流向，看资金流方向是否对应题材
-df_north = hsgt_realtime()
-hgt_close = df_north["hgt_yi"].dropna().iloc[-1] if not df_north.empty else 0
-sgt_close = df_north["sgt_yi"].dropna().iloc[-1] if not df_north.empty else 0
-print(f"\n北向收盘累计: 沪股通 {hgt_close} 亿 / 深股通 {sgt_close} 亿")
+# df_north = hsgt_realtime()
+# hgt_close = df_north["hgt_yi"].dropna().iloc[-1] if not df_north.empty else 0
+# sgt_close = df_north["sgt_yi"].dropna().iloc[-1] if not df_north.empty else 0
+# print(f"\n北向收盘累计: 沪股通 {hgt_close} 亿 / 深股通 {sgt_close} 亿")
 
 # V3.0: 叠加行业对比，看哪些行业资金在流入
-comp = industry_comparison(10)
-print("\n行业涨幅 TOP 5:")
-for r in comp["top"][:5]:
-    print(f"  {r['name']}: {r['change_pct']}% 涨{r['up_count']}跌{r['down_count']}")
+# comp = industry_comparison(10)
+# print("\n行业涨幅 TOP 5:")
+# for r in comp["top"][:5]:
+#     print(f"  {r['name']}: {r['change_pct']}% 涨{r['up_count']}跌{r['down_count']}")
 def margin_trading(code: str, page_size: int = 30) -> list[dict]:
     """
     融资融券明细（日级）。
@@ -938,9 +938,9 @@ def margin_trading(code: str, page_size: int = 30) -> list[dict]:
     return rows
 
 # 用法
-data = margin_trading("600519")
-for d in data[:5]:
-    print(f"{d['date']}: 融资余额={d['rzye']/1e8:.2f}亿 融券余额={d['rqye']/1e8:.2f}亿")
+# data = margin_trading("600519")
+# for d in data[:5]:
+#     print(f"{d['date']}: 融资余额={d['rzye']/1e8:.2f}亿 融券余额={d['rqye']/1e8:.2f}亿")
 def block_trade(code: str, page_size: int = 20) -> list[dict]:
     """
     大宗交易记录。
@@ -970,9 +970,9 @@ def block_trade(code: str, page_size: int = 20) -> list[dict]:
     return rows
 
 # 用法
-data = block_trade("600519")
-for d in data[:5]:
-    print(f"{d['date']}: 价格={d['price']} 溢价={d['premium_pct']}% 买方={d['buyer']}")
+# data = block_trade("600519")
+# for d in data[:5]:
+#     print(f"{d['date']}: 价格={d['price']} 溢价={d['premium_pct']}% 买方={d['buyer']}")
 def holder_num_change(code: str, page_size: int = 10) -> list[dict]:
     """
     股东户数变化（季度级）。
@@ -996,9 +996,9 @@ def holder_num_change(code: str, page_size: int = 10) -> list[dict]:
     return rows
 
 # 用法
-data = holder_num_change("600519")
-for d in data[:5]:
-    print(f"{d['date']}: 股东数={d['holder_num']} 变化={d['change_ratio']}% 户均={d['avg_shares']}")
+# data = holder_num_change("600519")
+# for d in data[:5]:
+#     print(f"{d['date']}: 股东数={d['holder_num']} 变化={d['change_ratio']}% 户均={d['avg_shares']}")
 # 股东户数持续减少 = 筹码集中 = 主力吸筹信号
 def dividend_history(code: str, page_size: int = 20) -> list[dict]:
     """
@@ -1023,9 +1023,9 @@ def dividend_history(code: str, page_size: int = 20) -> list[dict]:
     return rows
 
 # 用法
-data = dividend_history("600519")
-for d in data[:5]:
-    print(f"{d['date']}: 每股派息={d['bonus_rmb']}元 转增={d['transfer_ratio']} 送={d['bonus_ratio']}")
+# data = dividend_history("600519")
+# for d in data[:5]:
+#     print(f"{d['date']}: 每股派息={d['bonus_rmb']}元 转增={d['transfer_ratio']} 送={d['bonus_ratio']}")
 
 def stock_fund_flow_120d(code: str) -> list[dict]:
     """
@@ -1069,14 +1069,14 @@ def stock_fund_flow_120d(code: str) -> list[dict]:
     return rows
 
 # 用法
-data = stock_fund_flow_120d("600519")
-for d in data[-5:]:
-    print(f"{d['date']}: 主力净流入={d['main_net']/1e4:.0f}万 超大单={d['super_net']/1e4:.0f}万")
+# data = stock_fund_flow_120d("600519")
+# for d in data[-5:]:
+#     print(f"{d['date']}: 主力净流入={d['main_net']/1e4:.0f}万 超大单={d['super_net']/1e4:.0f}万")
 
 # 统计近20日主力净流入
-recent_20 = data[-20:]
-total_main = sum(d["main_net"] for d in recent_20)
-print(f"\n近20日主力累计净流入: {total_main/1e8:.2f}亿")
+# recent_20 = data[-20:]
+# total_main = sum(d["main_net"] for d in recent_20)
+# print(f"\n近20日主力累计净流入: {total_main/1e8:.2f}亿")
 
 def eastmoney_stock_news(code: str, page_size: int = 20) -> list[dict]:
     """
@@ -1119,9 +1119,9 @@ def eastmoney_stock_news(code: str, page_size: int = 20) -> list[dict]:
     return rows
 
 # 用法
-news = eastmoney_stock_news("688017")
-for n in news[:5]:
-    print(f"  {n['time']} | {n['source']} | {n['title']}")
+# news = eastmoney_stock_news("688017")
+# for n in news[:5]:
+#     print(f"  {n['time']} | {n['source']} | {n['title']}")
 
 def cls_telegraph(page_size: int = 50) -> list[dict]:
     """
@@ -1144,9 +1144,9 @@ def cls_telegraph(page_size: int = 50) -> list[dict]:
     return rows
 
 # 用法
-news = cls_telegraph()
-for n in news[:10]:
-    print(f"  {n['time']} | {n['title'][:60]}")
+# news = cls_telegraph()
+# for n in news[:10]:
+#     print(f"  {n['time']} | {n['title'][:60]}")
 
 
 def eastmoney_global_news(page_size: int = 50) -> list[dict]:
@@ -1175,14 +1175,14 @@ def eastmoney_global_news(page_size: int = 50) -> list[dict]:
     return rows
 
 # 用法
-news = eastmoney_global_news()
-for n in news[:10]:
-    print(f"  {n['time']} | {n['title']}")
+# news = eastmoney_global_news()
+# for n in news[:10]:
+#     print(f"  {n['time']} | {n['title']}")
 
-client = tdx_client()  # 见 Prerequisites 的 tdx_client() helper（规避 0.11.x BESTIP bug；等价 Quotes.factory(market='std')）
+# client = tdx_client()  # 见 Prerequisites 的 tdx_client() helper（规避 0.11.x BESTIP bug；等价 Quotes.factory(market='std')）
 
 # market: 0=深圳, 1=上海
-fin = client.finance(symbol='688017')
+# fin = client.finance(symbol='688017')
 # 返回 37 个字段的季报快照:
 #   liutongguben(流通股本), zongguben(总股本)
 #   eps(每股收益), bvps(每股净资产), roe(净资产收益率%)
@@ -1191,18 +1191,18 @@ fin = client.finance(symbol='688017')
 #   meiguweifeipeili(每股未分配利润)
 #   等37个季报财务字段
 
-client = tdx_client()  # 见 Prerequisites 的 tdx_client() helper（规避 0.11.x BESTIP bug；等价 Quotes.factory(market='std')）
+# client = tdx_client()  # 见 Prerequisites 的 tdx_client() helper（规避 0.11.x BESTIP bug；等价 Quotes.factory(market='std')）
 
 # 9 大类文本数据:
-categories = [
-    "最新提示", "公司概况", "财务分析",
-    "股东研究", "股本结构", "资本运作",
-    "业内点评", "行业分析", "公司大事",
-]
-for cat in categories:
-    text = client.F10(symbol='688017', name=cat)
-    print(f"=== {cat} ===")
-    print(text[:200] if text else "(空)")
+# categories = [
+#     "最新提示", "公司概况", "财务分析",
+#     "股东研究", "股本结构", "资本运作",
+#     "业内点评", "行业分析", "公司大事",
+# ]
+# for cat in categories:
+#     text = client.F10(symbol='688017', name=cat)
+#     print(f"=== {cat} ===")
+#     print(text[:200] if text else "(空)")
 
 def eastmoney_stock_info(code: str) -> dict:
     """
@@ -1232,8 +1232,8 @@ def eastmoney_stock_info(code: str) -> dict:
     }
 
 # 用法
-info = eastmoney_stock_info("688017")
-print(f"{info['name']}({info['code']}): 行业={info['industry']} 总市值={info['mcap']/1e8:.0f}亿 上市={info['list_date']}")
+# info = eastmoney_stock_info("688017")
+# print(f"{info['name']}({info['code']}): 行业={info['industry']} 总市值={info['mcap']/1e8:.0f}亿 上市={info['list_date']}")
 
 def sina_financial_report(code: str, report_type: str = "lrb", num: int = 8) -> list[dict]:
     """
@@ -1277,15 +1277,15 @@ def sina_financial_report(code: str, report_type: str = "lrb", num: int = 8) -> 
     return rows
 
 # 用法: 利润表
-lrb = sina_financial_report("600519", "lrb")
-for item in lrb[:3]:
-    print(f"报告期: {item.get('报告期', '')} 净利润: {item.get('净利润', '')}")
+# lrb = sina_financial_report("600519", "lrb")
+# for item in lrb[:3]:
+#     print(f"报告期: {item.get('报告期', '')} 净利润: {item.get('净利润', '')}")
 
 # 用法: 资产负债表
-fzb = sina_financial_report("600519", "fzb")
+# fzb = sina_financial_report("600519", "fzb")
 
 # 用法: 现金流量表
-llb = sina_financial_report("600519", "llb")
+# llb = sina_financial_report("600519", "llb")
 
 def _cninfo_ts_to_date(ts):
     """巨潮 announcementTime 返回 Unix 毫秒整数，需转换为日期字符串。"""
@@ -1362,11 +1362,11 @@ def cninfo_announcements(code: str, page_size: int = 30) -> list[dict]:
     return rows
 
 # 用法
-anns = cninfo_announcements("688017")
-for a in anns[:10]:
-    print(f"  {a['date']} | {a['type']} | {a['title']}")
-client = tdx_client()  # 见 Prerequisites 的 tdx_client() helper（规避 0.11.x BESTIP bug；等价 Quotes.factory(market='std')）
-text = client.F10(symbol='688017', name='最新提示')
+# anns = cninfo_announcements("688017")
+# for a in anns[:10]:
+#     print(f"  {a['date']} | {a['type']} | {a['title']}")
+# client = tdx_client()  # 见 Prerequisites 的 tdx_client() helper（规避 0.11.x BESTIP bug；等价 Quotes.factory(market='std')）
+# text = client.F10(symbol='688017', name='最新提示')
 # 包含最近的公告/分红/股东大会决议等摘要
 def forward_pe(price: float, eps_forecast: float) -> float:
     """前向PE = 当前股价 / 未来年度一致预期EPS"""
@@ -1452,84 +1452,84 @@ def full_valuation(code: str) -> dict:
     }
 
 # 用法
-result = full_valuation("688017")
-print(result)
-stocks = ["688017", "300308", "300476", "002463"]
-for code in stocks:
-    try:
-        r = full_valuation(code)
-        print(f"{r['name']}({code}): PE_fwd={r['pe_fwd']}x PEG={r['peg']} 消化={r['digest_years']}年 覆盖={r['analyst_count']}家")
-    except Exception as e:
-        print(f"{code}: 失败 - {e}")
+# result = full_valuation("688017")
+# print(result)
+# stocks = ["688017", "300308", "300476", "002463"]
+# for code in stocks:
+#     try:
+#         r = full_valuation(code)
+#         print(f"{r['name']}({code}): PE_fwd={r['pe_fwd']}x PEG={r['peg']} 消化={r['digest_years']}年 覆盖={r['analyst_count']}家")
+#     except Exception as e:
+#         print(f"{code}: 失败 - {e}")
 # Step 1: iwencai 多 query 语义搜索
-queries = [
-    "人形机器人产业链深度 2026",
-    "人形机器人减速器 丝杠",
-    "特斯拉Optimus 国产供应链",
-]
-seen_uids = set()
-all_articles = []
-for q in queries:
-    arts = iwencai_search(q, channel="report", size=50)
-    for a in arts:
-        uid = a.get("uid", "")
-        if uid not in seen_uids:
-            seen_uids.add(uid)
-            all_articles.append(a)
-print(f"共 {len(all_articles)} 篇去重后研报")
+# queries = [
+#     "人形机器人产业链深度 2026",
+#     "人形机器人减速器 丝杠",
+#     "特斯拉Optimus 国产供应链",
+# ]
+# seen_uids = set()
+# all_articles = []
+# for q in queries:
+#     arts = iwencai_search(q, channel="report", size=50)
+#     for a in arts:
+#         uid = a.get("uid", "")
+#         if uid not in seen_uids:
+#             seen_uids.add(uid)
+#             all_articles.append(a)
+# print(f"共 {len(all_articles)} 篇去重后研报")
 
 # Step 2: 东财补充同标的研报 + PDF
-for a in all_articles[:10]:
-    stocks = a.get("stock_infos") or []
-    for s in stocks:
-        stock_code = s.get("code", "")
-        if stock_code:
-            em = eastmoney_reports(stock_code, max_pages=1)
-            print(f"  {stock_code}: 东财 {len(em)} 篇")
-code = "688017"
+# for a in all_articles[:10]:
+#     stocks = a.get("stock_infos") or []
+#     for s in stocks:
+#         stock_code = s.get("code", "")
+#         if stock_code:
+#             em = eastmoney_reports(stock_code, max_pages=1)
+#             print(f"  {stock_code}: 东财 {len(em)} 篇")
+# code = "688017"
 
 # 1. 有无机构覆盖？
-forecast = ths_eps_forecast(code)
-print(f"机构覆盖: {'有' if not forecast.empty else '无'}")
+# forecast = ths_eps_forecast(code)
+# print(f"机构覆盖: {'有' if not forecast.empty else '无'}")
 
 # 2. 实时估值
-quotes = tencent_quote([code])
-q = quotes[code]
-print(f"PE={q['pe_ttm']} PB={q['pb']} 市值={q['mcap_yi']}亿")
+# quotes = tencent_quote([code])
+# q = quotes[code]
+# print(f"PE={q['pe_ttm']} PB={q['pb']} 市值={q['mcap_yi']}亿")
 
 # 3. PE消化 → 用 full_valuation()
 # 4. PEG校验
 
 # 5. 概念板块归属
-blocks = eastmoney_concept_blocks(code)
-print(f"板块: {', '.join(blocks['concept_tags'][:10])}")
+# blocks = eastmoney_concept_blocks(code)
+# print(f"板块: {', '.join(blocks['concept_tags'][:10])}")
 
 # 6. 资金流向（分钟级，当日盘中）
-flow = eastmoney_fund_flow_minute(code)
-if flow:
-    total = sum(f["main_net"] for f in flow)
-    print(f"当日主力累计净流入: {total/1e4:.0f}万")
+# flow = eastmoney_fund_flow_minute(code)
+# if flow:
+#     total = sum(f["main_net"] for f in flow)
+#     print(f"当日主力累计净流入: {total/1e4:.0f}万")
 
 # 7. 资金流向（东财120日）
-flow_120 = stock_fund_flow_120d(code)
-if flow_120:
-    total = sum(d["main_net"] for d in flow_120[-20:])
-    print(f"近20日主力累计净流入: {total/1e8:.2f}亿")
+# flow_120 = stock_fund_flow_120d(code)
+# if flow_120:
+#     total = sum(d["main_net"] for d in flow_120[-20:])
+#     print(f"近20日主力累计净流入: {total/1e8:.2f}亿")
 
 # 8. 龙虎榜
-dtb = dragon_tiger_board(code, "2026-05-17")
-print(f"近30日上龙虎榜: {len(dtb['records'])} 次")
+# dtb = dragon_tiger_board(code, "2026-05-17")
+# print(f"近30日上龙虎榜: {len(dtb['records'])} 次")
 
 # 9. 解禁预警
-lockup = lockup_expiry(code, "2026-05-17")
-print(f"未来90天待解禁: {len(lockup['upcoming'])} 批")
+# lockup = lockup_expiry(code, "2026-05-17")
+# print(f"未来90天待解禁: {len(lockup['upcoming'])} 批")
 
 # 10. 融资融券
-margin = margin_trading(code, page_size=5)
-if margin:
-    print(f"最新融资余额: {margin[0]['rzye']/1e8:.2f}亿")
+# margin = margin_trading(code, page_size=5)
+# if margin:
+#     print(f"最新融资余额: {margin[0]['rzye']/1e8:.2f}亿")
 
 # 11. 股东户数
-holders = holder_num_change(code)
-if holders:
-    print(f"最新股东数: {holders[0]['holder_num']} 环比{holders[0]['change_ratio']}%")
+# holders = holder_num_change(code)
+# if holders:
+#     print(f"最新股东数: {holders[0]['holder_num']} 环比{holders[0]['change_ratio']}%")
