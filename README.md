@@ -58,6 +58,47 @@ OpenAI、Anthropic、Google Gemini、DeepSeek、Moonshot、智谱、硅基流动
   <img src="assets/web/settings.png" width="80%" alt="定时分析"/>
 </div>
 
+## 数据增强：a-stock-data 整合（本分支专属）
+
+本分支整合了 [a-stock-data](https://github.com/simonlin1212/a-stock-data)（7 层架构、28 端点、13 数据源），为 14 个 Agent 补上了更丰富的数据维度。
+
+### 新增数据能力
+
+| 分类 | 新增数据 | 来源 |
+|------|---------|------|
+| 研报层 | 个股研报+评级+EPS预测、行业研报、PDF下载、一致预期、NL语义搜索 | 东财 reportapi + 同花顺 + iwencai |
+| 资金面 | 融资融券明细、大宗交易、股东户数变化、分红送转历史 | 东财 datacenter + push2 |
+| 信号层 | 限售解禁日历、个股全板块归属（行业/概念/地域）、行业排名 | 东财 push2 + slist |
+| 公告层 | 巨潮 cninfo 沪深北全量公告（动态 orgId 映射 6198 只股） | 巨潮 + mootdx |
+| 行情层 | 通达信 TCP 直连（不封 IP）+ 腾讯财经 + 百度K线带均线 | mootdx + 腾讯 + 百度 |
+| 估值 | 前向PE / PEG / PE消化年数自动计算 | 自研公式 |
+
+### 数据流架构
+
+```
+cn_akshare (主力，原数据源)
+    └─ 失败时自动降级 →
+cn_baostock (备用)
+    └─ 再降级 →
+cn_a_stock_data (本分支新增，28 端点)
+    └─ 再降级 →
+yfinance / alpha_vantage (海外数据)
+```
+
+原 akshare 通路完全保留，a-stock-data 只在 akshare 无数据时自动兜底。 东财接口已内置统一限流（间隔 ≥1s + 随机抖动）防封 IP。
+
+### Agent 工具分配
+
+| Agent | 新增工具 |
+|-------|---------|
+| 基本面分析师 | 研报检索、一致预期、估值计算、公告查询 |
+| 聪明钱分析师 | 融资融券、大宗交易、股东户数变化 |
+| 宏观分析师 | 北向资金、行业研报 |
+
+> 基于 [simonlin1212/a-stock-data](https://github.com/simonlin1212/a-stock-data)（⭐5.5k，Apache 2.0）整合。
+
+---
+
 ## 核心架构
 
 TradingAgents 模拟真实交易机构的部门协作，将复杂任务拆解为专业的智能体角色：
@@ -94,16 +135,20 @@ TradingAgents 模拟真实交易机构的部门协作，将复杂任务拆解为
 ### Docker 一键部署 (推荐)
 
 ```bash
-docker pull ghcr.io/kylinmountain/tradingagents-ashare:latest
-
-mkdir -p $(pwd)/data
-export TA_APP_SECRET_KEY=$(openssl rand -base64 32)
-
-docker run -d -p 8000:8000 \
-  --name tradingagents \
+# 方式一：使用本分支镜像（含 a-stock-data 数据增强）
+docker build -t tradingagents-ashare:a-stock-data .
+docker run -d -p 8000:8000 --name tradingagents \
   -v $(pwd)/data:/app/data \
   -e DATABASE_URL="sqlite:///./data/tradingagents.db" \
-  -e TA_APP_SECRET_KEY="${TA_APP_SECRET_KEY}" \
+  -e TA_APP_SECRET_KEY="$(openssl rand -base64 32)" \
+  tradingagents-ashare:a-stock-data
+
+# 方式二：使用官方原版镜像
+docker pull ghcr.io/kylinmountain/tradingagents-ashare:latest
+docker run -d -p 8000:8000 --name tradingagents \
+  -v $(pwd)/data:/app/data \
+  -e DATABASE_URL="sqlite:///./data/tradingagents.db" \
+  -e TA_APP_SECRET_KEY="$(openssl rand -base64 32)" \
   ghcr.io/kylinmountain/tradingagents-ashare:latest
 ```
 
@@ -118,7 +163,13 @@ docker run -d -p 8000:8000 \
 ### 源码安装
 
 ```bash
+# 原版
 git clone https://github.com/KylinMountain/TradingAgents-AShare.git
+
+# 本分支（含 a-stock-data 数据增强）
+git clone https://github.com/chentao326/TradingAgents-AShare.git
+cd TradingAgents-AShare
+git checkout feat/a-stock-data-integration
 cd TradingAgents-AShare
 
 # 后端（Python 3.10+）
@@ -178,6 +229,8 @@ curl -X POST 'https://app.510168.xyz/v1/analyze' \
 ## 特别鸣谢
 
 本项目核心架构灵感与部分基础逻辑源自 [TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)。感谢原作者及团队在多智能体交易领域做出的卓越探索与开源贡献。
+
+本分支数据增强整合自 [simonlin1212/a-stock-data](https://github.com/simonlin1212/a-stock-data)（⭐5.5k，Apache 2.0），感谢 Simon 林提供的 A 股全栈数据工具包。
 
 ## 许可说明
 - 本项目基于 [TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) (Apache 2.0) 二次开发。
