@@ -45,6 +45,44 @@ TOOLS_CATEGORIES = {
             "get_hot_stocks_xq",
         ],
     },
+    "cn_research": {
+        "description": "China A-share research reports and consensus estimates",
+        "tools": [
+            "get_research_reports",
+            "get_industry_reports",
+            "get_consensus_eps",
+            "search_reports_nl",
+        ],
+    },
+    "cn_capital_flow": {
+        "description": "China A-share capital flow and ownership data",
+        "tools": [
+            "get_margin_trading",
+            "get_block_trades",
+            "get_holder_count",
+            "get_dividend_history",
+        ],
+    },
+    "cn_locked_shares": {
+        "description": "China A-share lockup share expiry calendar",
+        "tools": ["get_lockup_expiry"],
+    },
+    "cn_sectors": {
+        "description": "China A-share sector/concept block membership",
+        "tools": ["get_concept_blocks"],
+    },
+    "cn_filings": {
+        "description": "China A-share company filings from cninfo",
+        "tools": ["get_filings"],
+    },
+    "cn_valuation": {
+        "description": "China A-share valuation analysis (forward PE, PEG, etc.)",
+        "tools": ["get_valuation"],
+    },
+    "cn_northbound": {
+        "description": "China A-share northbound (HK Stock Connect) flow",
+        "tools": ["get_northbound_flow"],
+    },
 }
 
 _registry = build_default_registry()

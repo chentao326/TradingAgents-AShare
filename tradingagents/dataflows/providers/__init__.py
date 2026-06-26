@@ -5,5 +5,6 @@ __all__ = [
     "BaseMarketDataProvider",
     "DataProviderRegistry",
     "build_default_registry",
+    "CnAStockDataProvider",
 ]
 

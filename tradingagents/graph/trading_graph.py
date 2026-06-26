@@ -37,6 +37,18 @@ from tradingagents.agents.utils.agent_utils import (
     get_board_fund_flow,
     get_individual_fund_flow,
     get_lhb_detail,
+    get_research_reports,
+    get_industry_reports,
+    get_consensus_eps,
+    get_margin_trading,
+    get_block_trades,
+    get_holder_count,
+    get_dividend_history,
+    get_lockup_expiry,
+    get_concept_blocks,
+    get_filings,
+    get_valuation,
+    get_northbound_flow,
 )
 
 from .conditional_logic import ConditionalLogic
@@ -215,6 +227,11 @@ class TradingAgentsGraph:
                     get_balance_sheet,
                     get_cashflow,
                     get_income_statement,
+                    # Extended a-stock-data tools
+                    get_research_reports,
+                    get_consensus_eps,
+                    get_valuation,
+                    get_filings,
                 ]
             ),
             "macro": ToolNode(
@@ -222,6 +239,8 @@ class TradingAgentsGraph:
                     # Macro analyst tools
                     get_board_fund_flow,
                     get_news,
+                    get_northbound_flow,
+                    get_industry_reports,
                 ]
             ),
             "smart_money": ToolNode(
@@ -230,6 +249,9 @@ class TradingAgentsGraph:
                     get_individual_fund_flow,
                     get_lhb_detail,
                     get_indicators,
+                    get_margin_trading,
+                    get_block_trades,
+                    get_holder_count,
                 ]
             ),
             "volume_price": ToolNode(

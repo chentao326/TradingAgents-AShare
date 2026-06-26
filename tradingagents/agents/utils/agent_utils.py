@@ -25,6 +25,21 @@ from tradingagents.agents.utils.game_theory_tools import (
     get_zt_pool,
     get_hot_stocks_xq,
 )
+from tradingagents.agents.utils.a_stock_data_tools import (
+    get_research_reports,
+    get_industry_reports,
+    get_consensus_eps,
+    search_reports_nl,
+    get_margin_trading,
+    get_block_trades,
+    get_holder_count,
+    get_dividend_history,
+    get_lockup_expiry,
+    get_concept_blocks,
+    get_filings,
+    get_valuation,
+    get_northbound_flow,
+)
 
 def create_msg_delete():
     def delete_messages(state):
